@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WalnutTwin · 3D Viewer</title>
+    <meta name="description" content="Interactive GLB viewer powered by Three.js" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  </head>
+  <body>
+    <div id="app" class="app-shell">
+      <header class="app-header">
+        <div class="brand">
+          <span class="dot"></span>
+          <div>
+            <p class="eyebrow">Step 1 · 展示线</p>
+            <h1>WalnutTwin 3D Viewer</h1>
+          </div>
+        </div>
+        <div class="actions">
+          <button id="resetCamera" class="ghost-btn">重置视角</button>
+          <a class="primary-btn" href="https://threejs.org/docs/" target="_blank" rel="noreferrer">
+            Three.js Docs
+          </a>
+        </div>
+      </header>
+
+      <main class="layout">
+        <section class="viewer-card">
+          <div id="viewer" class="viewer"></div>
+          <div id="overlay" class="overlay">
+            <div class="loader"></div>
+            <p>模型加载中…</p>
+          </div>
+          <div id="errorBanner" class="error-banner hidden"></div>
+        </section>
+
+        <aside class="side-panel" aria-label="模型参数">
+          <h2>参数面板</h2>
+          <div id="parameters" class="param-list"></div>
+          <div class="control-card">
+            <h3>模型操作</h3>
+            <label class="ghost-btn file-label">
+              <input id="localModel" type="file" accept=".glb,.gltf" hidden />
+              选择本地 GLB / GLTF
+            </label>
+            <p class="muted">
+              - 本地文件不保存到服务器，仅在浏览器内加载。<br />
+              - 推荐 GLB 单文件；GLTF 需放置依赖到同级目录后再使用。
+            </p>
+          </div>
+          <div class="hint">
+            <p>替换模型：将文件放到 <code>public/models/</code> 并更新 <code>src/viewer.js</code> 的路径。</p>
+            <p>所有值目前为 mock，可接入后端后替换。</p>
+          </div>
+        </aside>
+      </main>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
