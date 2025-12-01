@@ -6,8 +6,7 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 export const MODEL_PATH = "/models/sample.glb";
 
 /**
- * 初始化 Three.js 渲染器。
- * 仅依赖 DOM 中已有的容器元素，返回简单的控制 API。
+ * 初始化 Three.js 渲染器，返回控制 API。
  */
 export function initViewer(containerId = "viewer", hooks = {}) {
   const container = document.getElementById(containerId);
@@ -15,9 +14,9 @@ export function initViewer(containerId = "viewer", hooks = {}) {
     throw new Error(`未找到 viewer 容器：${containerId}`);
   }
 
-  const { onLoading, onLoaded, onError } = hooks;
+  const { onLoading, onLoaded, onError, initialModelPath = MODEL_PATH } = hooks;
 
-  // 基本场景设置
+  // 场景与渲染器
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0xf6f8fc);
 
@@ -29,6 +28,7 @@ export function initViewer(containerId = "viewer", hooks = {}) {
   renderer.setSize(container.clientWidth, container.clientHeight);
   container.appendChild(renderer.domElement);
 
+  // 相机与控制器
   const camera = new THREE.PerspectiveCamera(
     60,
     container.clientWidth / container.clientHeight,
@@ -44,7 +44,7 @@ export function initViewer(containerId = "viewer", hooks = {}) {
   controls.maxDistance = 6;
   controls.target.set(0, 0.15, 0);
 
-  // 灯光：柔和的环境光 + 主方向光（开启阴影）
+  // 灯光：环境光 + 方向光（开启阴影）
   const hemiLight = new THREE.HemisphereLight(0xffffff, 0x9ca3af, 0.9);
   scene.add(hemiLight);
 
@@ -56,7 +56,7 @@ export function initViewer(containerId = "viewer", hooks = {}) {
   dirLight.shadow.camera.far = 10;
   scene.add(dirLight);
 
-  // 接受阴影的地面，帮助提供空间感
+  // 接受阴影的地面
   const ground = new THREE.Mesh(
     new THREE.PlaneGeometry(6, 6),
     new THREE.ShadowMaterial({ opacity: 0.18 })
@@ -68,15 +68,19 @@ export function initViewer(containerId = "viewer", hooks = {}) {
 
   const loader = new GLTFLoader();
   let currentModel = null;
+  let lastModelPath = initialModelPath;
 
   function disposeCurrentModel() {
     if (!currentModel) return;
     scene.remove(currentModel);
     currentModel.traverse((child) => {
       if (child.isMesh) {
-        child.geometry.dispose();
-        if (child.material.map) child.material.map.dispose();
-        child.material.dispose();
+        child.geometry?.dispose();
+        if (Array.isArray(child.material)) {
+          child.material.forEach((mat) => mat?.dispose());
+        } else {
+          child.material?.dispose();
+        }
       }
     });
     currentModel = null;
@@ -121,10 +125,12 @@ export function initViewer(containerId = "viewer", hooks = {}) {
     if (revokeUrl) URL.revokeObjectURL(revokeUrl);
   }
 
-  function loadModel(path = MODEL_PATH) {
+  function loadModel(path = lastModelPath || initialModelPath) {
+    const targetPath = path || initialModelPath;
+    lastModelPath = targetPath;
     onLoading?.();
     loader.load(
-      path,
+      targetPath,
       (gltf) => handleGltfLoaded(gltf),
       undefined,
       (err) => {
@@ -173,7 +179,7 @@ export function initViewer(containerId = "viewer", hooks = {}) {
     renderer.render(scene, camera);
   }
 
-  loadModel();
+  loadModel(initialModelPath);
   animate();
 
   return {

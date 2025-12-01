@@ -1,5 +1,5 @@
 import "./style.css";
-import { initViewer } from "./viewer.js";
+import { initViewer, MODEL_PATH } from "./viewer.js";
 import {
   bindResetButton,
   bindLocalFileInput,
@@ -17,6 +17,11 @@ function ensureWebGLSupport() {
   return Boolean(gl);
 }
 
+function getInitialModelPath() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get("model") || MODEL_PATH;
+}
+
 function bootstrap() {
   if (!ensureWebGLSupport()) {
     showError("当前浏览器不支持 WebGL，请使用现代浏览器或开启硬件加速。");
@@ -27,6 +32,7 @@ function bootstrap() {
   setLoading(true);
 
   const viewer = initViewer("viewer", {
+    initialModelPath: getInitialModelPath(),
     onLoading: () => setLoading(true),
     onLoaded: () => {
       setLoading(false);
