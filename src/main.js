@@ -3,6 +3,7 @@ import { initViewer } from "./viewer.js";
 import {
   bindResetButton,
   bindLocalFileInput,
+  bindDragAndDrop,
   hideError,
   mockParameters,
   renderParameters,
@@ -39,6 +40,10 @@ function bootstrap() {
 
   bindResetButton(() => viewer.resetView());
   bindLocalFileInput((file) => viewer.loadLocalFile(file));
+  bindDragAndDrop("viewer", {
+    onFile: (file) => viewer.loadLocalFile(file),
+    onError: (message) => showError(message),
+  });
   window.addEventListener("resize", () => viewer.resize());
 }
 

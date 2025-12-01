@@ -1,6 +1,7 @@
 const overlay = () => document.getElementById("overlay");
 const errorBanner = () => document.getElementById("errorBanner");
 const paramsContainer = () => document.getElementById("parameters");
+const dropHint = () => document.getElementById("dropHint");
 
 export const mockParameters = [
   { label: "长度", value: "43 mm" },
@@ -48,6 +49,39 @@ export function setLoading(isLoading) {
   const el = overlay();
   if (!el) return;
   el.classList.toggle("hidden", !isLoading);
+}
+
+export function bindDragAndDrop(targetId, { onFile, onError } = {}) {
+  const target = document.getElementById(targetId);
+  const hint = dropHint();
+  if (!target || !hint) return;
+
+  const prevent = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const hideHint = () => hint.classList.add("hidden");
+  const showHint = () => hint.classList.remove("hidden");
+
+  ["dragenter", "dragover", "dragleave", "drop"].forEach((event) => {
+    target.addEventListener(event, prevent);
+  });
+
+  target.addEventListener("dragenter", showHint);
+  target.addEventListener("dragover", showHint);
+  target.addEventListener("dragleave", hideHint);
+  target.addEventListener("drop", (e) => {
+    hideHint();
+    const file = e.dataTransfer?.files?.[0];
+    if (!file) return;
+    const ext = file.name.toLowerCase();
+    if (!ext.endsWith(".glb") && !ext.endsWith(".gltf")) {
+      onError?.("仅支持 GLB / GLTF 文件拖拽加载。");
+      return;
+    }
+    onFile?.(file);
+  });
 }
 
 export function showError(message) {
