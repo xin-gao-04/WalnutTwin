@@ -2,8 +2,10 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 
+const basePath = (import.meta.env.BASE_URL || "/").replace(/\/?$/, "/");
+
 // 默认示例模型；可在调用时传入新的路径，或直接修改此常量。
-export const MODEL_PATH = "/models/sample.glb";
+export const MODEL_PATH = `${basePath}models/sample.glb`;
 
 /**
  * 初始化 Three.js 渲染器，返回控制 API。
